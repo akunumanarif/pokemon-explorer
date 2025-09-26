@@ -48,6 +48,12 @@ interface UpdateTeamData {
   isPublic: boolean;
 }
 
+export interface AddTeamMemberData {
+  pokemonId: number;
+  position?: number;
+  nickname?: string;
+}
+
 /**
  * Custom hook for teams management
  */
@@ -137,8 +143,8 @@ export function useTeams() {
 
   // Add team member mutation
   const addTeamMemberMutation = useMutation({
-    mutationFn: async ({ teamId, pokemonId }: { teamId: number; pokemonId: number }) => {
-      const response = await api.post(`/teams/${teamId}/members`, { pokemonId });
+    mutationFn: async ({ teamId, data }: { teamId: number; data: AddTeamMemberData }) => {
+      const response = await api.post(`/teams/${teamId}/members`, data);
       return response.data;
     },
     onSuccess: (_, { teamId }) => {
@@ -173,8 +179,28 @@ export function useTeams() {
     updateTeam: (teamId: number, data: UpdateTeamData) => 
       updateTeamMutation.mutate({ teamId, data }),
     deleteTeam: deleteTeamMutation.mutate,
-    addTeamMember: (teamId: number, pokemonId: number) => 
-      addTeamMemberMutation.mutate({ teamId, pokemonId }),
+    /**
+     * Add a Pokemon to a team
+     * @param teamId - The team ID
+     * @param pokemonIdOrData - Either Pokemon ID (number) or AddTeamMemberData object
+     * @param nickname - Optional nickname (only used when first param is pokemonId)
+     * @param position - Optional position 1-6 (only used when first param is pokemonId)
+     * 
+     * Examples:
+     * - addTeamMember(1, 25) // Add Pokemon #25 with auto position
+     * - addTeamMember(1, 25, "Pikachu", 1) // Add with nickname and specific position
+     * - addTeamMember(1, { pokemonId: 25, nickname: "Pikachu", position: 1 }) // Object syntax
+     */
+    addTeamMember: (teamId: number, pokemonIdOrData: number | AddTeamMemberData, nickname?: string, position?: number) => {
+      // Support both old signature (pokemonId) and new signature (data object)
+      let data: AddTeamMemberData;
+      if (typeof pokemonIdOrData === 'number') {
+        data = { pokemonId: pokemonIdOrData, nickname, position };
+      } else {
+        data = pokemonIdOrData;
+      }
+      addTeamMemberMutation.mutate({ teamId, data });
+    },
     removeTeamMember: (teamId: number, pokemonId: number) => 
       removeTeamMemberMutation.mutate({ teamId, pokemonId }),
     

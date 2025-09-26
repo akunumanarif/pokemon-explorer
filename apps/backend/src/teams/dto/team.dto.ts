@@ -39,11 +39,18 @@ export class AddTeamMemberDto {
   @IsNumber()
   pokemonId: number;
 
-  @ApiProperty({ example: 1, minimum: 1, maximum: 6 })
+  @ApiProperty({ 
+    example: 1, 
+    minimum: 1, 
+    maximum: 6, 
+    required: false,
+    description: 'Position in team (1-6). If not provided, will auto-assign to first available slot.' 
+  })
+  @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(6)
-  position: number;
+  position?: number;
 
   @ApiProperty({ example: 'Pikachu', required: false })
   @IsOptional()

@@ -25,12 +25,16 @@ services:
       context: ./apps/backend
       target: production
     container_name: pokemon_backend
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       JWT_SECRET: your-super-secret-jwt-key-here-change-in-production
       JWT_REFRESH_SECRET: your-refresh-secret-key-here-change-in-production
       JWT_EXPIRATION: 15m
       JWT_REFRESH_EXPIRATION: 7d
+      DATABASE_URL: postgresql://postgres:password123@db:5432/pokemon_db
       POKEAPI_BASE_URL: https://pokeapi.co/api/v2
       PORT: 3000
       CORS_ORIGIN: http://localhost:3000,http://frontend:3000

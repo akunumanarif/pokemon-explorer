@@ -99,11 +99,14 @@ export class TeamsController {
   @Post(':id/members')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Add Pokemon to team' })
+  @ApiOperation({ 
+    summary: 'Add Pokemon to team',
+    description: 'Add a Pokemon to the team. If position is not provided, it will be auto-assigned to the first available slot (1-6).'
+  })
   @ApiParam({ name: 'id', description: 'Team ID' })
-  @ApiResponse({ status: 201, description: 'Pokemon added to team' })
-  @ApiResponse({ status: 400, description: 'Team is full or invalid data' })
-  @ApiResponse({ status: 409, description: 'Pokemon already in team or position taken' })
+  @ApiResponse({ status: 201, description: 'Pokemon added to team successfully' })
+  @ApiResponse({ status: 400, description: 'Team is full (6 Pokemon limit) or invalid data' })
+  @ApiResponse({ status: 409, description: 'Pokemon already in team or specified position is already taken' })
   async addTeamMember(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any,

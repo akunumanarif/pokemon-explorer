@@ -9,9 +9,9 @@ services:
       NODE_ENV: development
       JWT_SECRET: dev-jwt-secret-key
       JWT_REFRESH_SECRET: dev-refresh-secret-key
-      JWT_EXPIRATION_TIME: 15m
-      JWT_REFRESH_EXPIRATION_TIME: 7d
-      POKEMON_API_BASE_URL: https://pokeapi.co/api/v2
+      JWT_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      POKEAPI_BASE_URL: https://pokeapi.co/api/v2
       PORT: 3001
       CORS_ORIGIN: http://localhost:3000,http://frontend:3000
     volumes:

@@ -160,23 +160,44 @@ export class TeamsService {
       throw new BadRequestException('Team is already full (maximum 6 Pokemon)');
     }
 
-    // Check if position is already taken
-    const existingMemberAtPosition = team.members.find(m => m.position === addMemberDto.position);
-    if (existingMemberAtPosition) {
-      throw new ConflictException(`Position ${addMemberDto.position} is already taken`);
-    }
-
     // Check if Pokemon is already in team
     const existingPokemon = team.members.find(m => m.pokemonId === addMemberDto.pokemonId);
     if (existingPokemon) {
       throw new ConflictException('Pokemon is already in this team');
     }
 
+    // Determine position: use provided position or auto-assign
+    let assignedPosition: number;
+    if (addMemberDto.position !== undefined) {
+      // Check if provided position is already taken
+      const existingMemberAtPosition = team.members.find(m => m.position === addMemberDto.position);
+      if (existingMemberAtPosition) {
+        throw new ConflictException(`Position ${addMemberDto.position} is already taken`);
+      }
+      assignedPosition = addMemberDto.position;
+    } else {
+      // Auto-assign to first available position
+      const occupiedPositions = team.members.map(m => m.position).sort((a, b) => a - b);
+      assignedPosition = 1;
+      for (const pos of occupiedPositions) {
+        if (assignedPosition === pos) {
+          assignedPosition++;
+        } else {
+          break;
+        }
+      }
+      
+      // Double-check we haven't exceeded limit (should not happen due to length check above)
+      if (assignedPosition > 6) {
+        throw new BadRequestException('Team is full and no position was specified');
+      }
+    }
+
     const member = await this.prisma.teamMember.create({
       data: {
         teamId,
         pokemonId: addMemberDto.pokemonId,
-        position: addMemberDto.position,
+        position: assignedPosition,
         nickname: addMemberDto.nickname,
       },
       include: {
