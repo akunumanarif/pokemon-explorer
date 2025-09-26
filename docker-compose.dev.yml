@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./apps/backend
+      target: development
+    environment:
+      NODE_ENV: development
+      JWT_SECRET: dev-jwt-secret-key
+      JWT_REFRESH_SECRET: dev-refresh-secret-key
+      JWT_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      POKEAPI_BASE_URL: https://pokeapi.co/api/v2
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:3000,http://frontend:3000
+    volumes:
+      - ./apps/backend/src:/app/src
+      - ./apps/backend/prisma:/app/prisma
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    command: npm run start:dev
+    depends_on:
+      - frontend
+    networks:
+      - pokemon_network
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      target: development
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXTAUTH_SECRET: dev-nextauth-secret
+      NEXTAUTH_URL: http://localhost:3000
+      PORT: 3000  
+    volumes:
+      - ./apps/frontend/src:/app/src
+      - ./apps/frontend/public:/app/public
+      - ./apps/frontend/components:/app/components
+      - ./apps/frontend/lib:/app/lib
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    networks:
+      - pokemon_network
+
+networks:
+  pokemon_network:
+    driver: bridge
